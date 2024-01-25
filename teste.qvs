@@ -1,0 +1,102 @@
+Temp_Reajuste:
+LOAD
+     ClienteApolice,
+    "Data Inicio" AS apuracao_inicial,
+    "Data Fim"  AS apuracao_final,
+    Upper(MonthName(date("Data Inicio"))) & ' a ' & Upper(MonthName(date("Data Fim"))) as "Periodo Reajuste", 
+    if(VCMH < 1, VCMH*100, VCMH) as VCMH
+FROM [lib://GNDI:DataFiles/2.Configuracoes_Configuracoes_gerais.xlsx]
+(ooxml, embedded labels, table is [Periodo e VCMH]);
+
+concatenate(Temp_Reajuste)
+LOAD
+    ClienteApolice,
+    "Data Inicio" AS apuracao_inicial,
+    "Data Fim"  AS apuracao_final,
+    Upper(MonthName(date("Data Inicio"))) & ' a ' & Upper(MonthName(date("Data Fim"))) as "Periodo Reajuste", 
+    if(VCMH < 1, VCMH*100, VCMH) as VCMH
+FROM [lib://Porto Seguro:DataFiles/2.Configuracoes_Configuracoes_gerais.xlsx]
+(ooxml, embedded labels, table is [Periodo e VCMH]);
+
+
+concatenate(Temp_Reajuste)
+LOAD
+    ClienteApolice,
+    "Data Inicio" AS apuracao_inicial,
+    "Data Fim"  AS apuracao_final,
+    Upper(MonthName(date("Data Inicio"))) & ' a ' & Upper(MonthName(date("Data Fim"))) as "Periodo Reajuste", 
+    if(VCMH < 1, VCMH*100, VCMH) as VCMH
+FROM [lib://Amil:DataFiles/Amil_2.Configuracoes_Configuracoes_gerais.xlsx]
+(ooxml, embedded labels, table is [Periodo e VCMH]);
+
+
+concatenate(Temp_Reajuste)
+LOAD
+    ClienteApolice,
+    "Data Inicio" AS apuracao_inicial,
+    "Data Fim"  AS apuracao_final,
+    Upper(MonthName(date("Data Inicio"))) & ' a ' & Upper(MonthName(date("Data Fim"))) as "Periodo Reajuste", 
+    if(VCMH < 1, VCMH*100, VCMH) as VCMH
+FROM [lib://CNU:DataFiles/CNU_Configuracoes_gerais.xlsx]
+(ooxml, embedded labels, table is [Periodo e VCMH]);
+
+concatenate(Temp_Reajuste)
+LOAD
+    upper(ClienteApolice) as ClienteApolice,
+    "Data Inicio" AS apuracao_inicial,
+    "Data Fim"  AS apuracao_final,
+    upper(monthname(date("Data Inicio"))) & ' a ' & upper(monthname(date("Data Fim"))) as "Periodo Reajuste", 
+    if(VCMH < 1, VCMH*100, VCMH) as VCMH
+FROM [lib://Hapvida:DataFiles/Hapvida_2.Configuracoes_Configuracoes_gerais.xlsx]
+(ooxml, embedded labels, table is [Periodo e VCMH]);
+
+concatenate(Temp_Reajuste)
+LOAD
+    ClienteApolice,
+    "Data Inicio" AS apuracao_inicial,
+    "Data Fim"  AS apuracao_final,
+    Upper(MonthName(date("Data Inicio"))) & ' a ' & Upper(MonthName(date("Data Fim"))) as "Periodo Reajuste", 
+    if(VCMH < 1, VCMH*100, VCMH) as VCMH
+FROM [lib://Golden:DataFiles/2.Configuracoes_Configuracoes_gerais.xlsx]
+(ooxml, embedded labels, table is [Periodo e VCMH]);
+
+concatenate(Temp_Reajuste)
+LOAD
+    ClienteApolice,
+    "Data Inicio Reajuste" AS apuracao_inicial,
+    "Data Fim Reajuste"   AS apuracao_final
+FROM [lib://ETL_Bradesco:DataFiles/Bradesco_Configuracoes_Configuracoes_gerais.xlsx]
+(ooxml, embedded labels, table is ReajusteCliente);
+
+
+
+Reajuste:
+Load
+	ClienteApolice,
+	apuracao_inicial,
+    apuracao_final,
+    "Periodo Reajuste",
+    VCMH,
+    if(ClienteApolice = previous(ClienteApolice),'N','S') as ultimo_periodo_reajuste
+resident Temp_Reajuste
+order by ClienteApolice, apuracao_inicial desc; 
+
+Map_Reajuste_Inicio:
+Mapping
+Load
+	distinct
+	ClienteApolice,
+    num(apuracao_inicial)
+resident Reajuste;
+
+Map_Reajuste_Fim:
+Mapping
+Load
+	distinct
+	ClienteApolice,
+    num(apuracao_final)
+resident Reajuste;
+
+drop table Temp_Reajuste;
+
+
